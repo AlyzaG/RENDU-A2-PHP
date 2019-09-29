@@ -5,6 +5,14 @@ require __DIR__ . "/vendor/autoload.php";
 
 ## CONNECTEZ VOUS A VOTRE BASE DE DONNEE
 
+try{
+    $pdo = new PDO('mysql:host=localhost;port=8889;dbname=php;charset=utf8', 'root', 'root');
+}
+catch(Exception $e)
+{
+    die('Erreur : '.$e->getMessage());
+}
+
 ## ETAPE 1
 
 ## POUVOIR SELECTIONER UN PERSONNE DANS LE PREMIER SELECTEUR
@@ -27,6 +35,37 @@ require __DIR__ . "/vendor/autoload.php";
 
 ## N'AFFICHER DANS LES SELECTEUR QUE LES PERSONNAGES QUI ONT PLUS DE 10 PV
 
+
+
+$query = $pdo->prepare("SELECT * FROM personnage");
+$query->execute();
+$array = $query->fetchAll(PDO::FETCH_OBJ);
+
+if (!empty($_POST)) {
+    $idPerso1 = $_POST['perso1'];
+    $idPerso2 = $_POST['perso2'];
+
+    $dbPerso1 = getPerso($idPerso1, $pdo);
+    $dbPerso2 = getPerso($idPerso2, $pdo);
+
+    $pvPerso1 = $dbPerso1->pv - $dbPerso2->atk;
+    $pvPerso2 = $dbPerso2->pv - $dbPerso1->atk;
+
+    echo $newPerso1->name . "a perdu " . $newPerso2->atk . "PV <br> il lui reste " . $newPerso1->pv . " PV <br>";
+    echo $newPerso2->name . "a perdu " . $newPerso1->atk . "PV <br> il lui reste " . $newPerso2->pv . " PV <br>";
+
+}
+
+
+
+
+function getPerso($id, $pdo)
+{
+    $query = $pdo->prepare("SELECT * FROM personnage WHERE id = :id");
+    $query->execute(['id' => $id]);
+
+    return $query->fetch(PDO::FETCH_OBJ);
+}
 
 ?>
 
@@ -53,10 +92,22 @@ require __DIR__ . "/vendor/autoload.php";
 
     <form action="">
         <div class="form-group">
-            <select name="" id=""></select>
+            <select name="Perso1" id="">
+                <option value="" disabled selected>Choissisez votre personnage</option>
+                <?php foreach ($array as $item) { ?>
+                    <option value="<?= $item->id_name ?>"><?= $item->name ?></option>
+                <?php } ?>
+
+            </select>
         </div>
         <div class="form-group">
-            <select name="" id=""></select>
+            <select name="Perso2" id="">
+                <option value="" disabled selected>Choissisez votre personnage</option>
+                <?php foreach ($array as $item) { ?>
+                    <option value="<?= $item->id_name ?>"><?= $item->name ?></option>
+                <?php } ?>
+
+            </select>
         </div>
 
         <button class="btn">Fight</button>

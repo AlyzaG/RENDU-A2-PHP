@@ -5,6 +5,14 @@ require __DIR__ . "/vendor/autoload.php";
 
 ## CONNECTEZ VOUS A VOTRE BASE DE DONNEE
 
+try{
+    $pdo = new PDO('mysql:host=localhost;port=8889;dbname=php;charset=utf8', 'root', 'root');
+}
+catch(Exception $e)
+{
+    die('Erreur : '.$e->getMessage());
+}
+
 ### ETAPE 1
 
 ####CREE UNE BASE DE DONNEE AVEC UNE TABLE PERSONNAGE, UNE TABLE TYPE
@@ -28,7 +36,7 @@ require __DIR__ . "/vendor/autoload.php";
 #######################
 ## ETAPE 2
 
-#### CREE DEUX LIGNE DANS LA TALE types
+#### CREE DEUX LIGNE DANS LA TABLE types
 # une ligne avec comme name = feu
 # une ligne avec comme name = eau
 
@@ -53,6 +61,27 @@ require __DIR__ . "/vendor/autoload.php";
 
 # ENREGISTRER 5 / 6 PERSONNAGE DIFFERENT
 
+
+$query = $pdo->prepare("SELECT name FROM type");
+$query->execute();
+$array = $query->fetchAll(PDO::FETCH_OBJ);
+
+if (!empty($_POST)) {
+    $name = $_POST['name'];
+    $atk = $_POST['atk'];
+    $pv = $_POST['pv'];
+    $type = $_POST['type_id'];
+    $query= $pdo->prepare("INSERT INTO personnage (name, atk, pv, type_id) VALUES (:name, :atk, :pv,  :type_id) ");
+    $query->execute(["name" => $name, "atk" =>(int) $atk, "pv" => (int)$pv, "type_id" =>(int) $type]);
+
+
+
+
+    echo "Personnage ". $_POST['name']." créer";
+}
+
+
+
 ?>
 
 
@@ -70,6 +99,7 @@ require __DIR__ . "/vendor/autoload.php";
 <body>
 <nav class="nav mb-3">
     <a href="./rendu.php" class="nav-link">Acceuil</a>
+
     <a href="./personnage.php" class="nav-link">Mes Personnages</a>
     <a href="./combat.php" class="nav-link">Combats</a>
 </nav>
@@ -78,21 +108,35 @@ require __DIR__ . "/vendor/autoload.php";
     <form action="" method="POST" class="form-group">
         <div class="form-group col-md-4">
             <label for="">Nom du personnage</label>
-            <input type="text" class="form-control" placeholder="Nom">
+            <input type="text" class="form-control" placeholder="Nom" name="name">
+
+
         </div>
 
         <div class="form-group col-md-4">
             <label for="">Attaque du personnage</label>
-            <input type="text" class="form-control" placeholder="Atk">
+            <input type="text" class="form-control" placeholder="Atk" name="atk">
+
+
         </div>
+
+
         <div class="form-group col-md-4">
             <label for="">Pv du personnage</label>
-            <input type="text" class="form-control" placeholder="Pv">
+            <input type="text" class="form-control" placeholder="Pv" name="pv">
+
+
         </div>
+
+
         <div class="form-group col-md-4">
             <label for="">Type</label>
-            <select name="" id="">
+            <select name="type_id" id="">
                 <option value="" selected disabled>Choissisez un type</option>
+                <?php foreach ($array as $type) { ?>
+                    <option name="type_id"><?=$type->name?> </option>
+                <?php } ?>
+
             </select>
         </div>
         <button class="btn btn-primary">Enregistrer</button>
